@@ -45,6 +45,9 @@ git commit -m "Update"
 git push
 ```
 
+### Fallback SPA / Rutas
+GitHub Pages no soporta rewriting dinámico, por lo que se añade `404.html` que redirige a `/Clientes/` para permitir recarga en rutas internas sin error 404.
+
 ## Notas
 - Tema claro/oscuro/sistema con Plus Jakarta Sans y fondos con gradientes (Material You / neón suave).
 - Accesibilidad: skip link, focus visible, labels, tooltips.

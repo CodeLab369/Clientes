@@ -2,7 +2,8 @@ name: Deploy GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -10,8 +11,15 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
-  build-deploy:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,5 +38,5 @@ jobs:
         with:
           path: dist
       - name: Deploy to Pages
-        id: deployment
+        id: deploy
         uses: actions/deploy-pages@v4

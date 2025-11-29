@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
@@ -6,6 +6,13 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const { login } = useAuth();
+
+    // Clear fields when component mounts (after logout)
+    useEffect(() => {
+        setUsername('');
+        setPassword('');
+        setError('');
+    }, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();

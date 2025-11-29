@@ -1,12 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Upload, File, Trash2 } from 'lucide-react';
 import { fileToBase64, formatFileSize, generateFileId } from '../../utils/fileUtils';
+import { useClients } from '../../context/ClientContext';
 
-const FileUploadModal = ({ isOpen, onClose, onUpload, clientName }) => {
+const FileUploadModal = ({ isOpen, onClose, onUpload, clientName, clientId }) => {
+    const { getClientFiles, deleteFileFromClient } = useClients();
+
     const [files, setFiles] = useState([]);
+    const [existingFiles, setExistingFiles] = useState([]);
     const [año, setAño] = useState(new Date().getFullYear().toString());
     const [periodo, setPeriodo] = useState('');
     const [uploading, setUploading] = useState(false);
+
+    // Fetch existing files when year/period changes
+    useEffect(() => {
+        if (clientId && año && periodo) {
+            const files = getClientFiles(clientId, { año, periodo });
+            setExistingFiles(files);
+        } else {
+            setExistingFiles([]);
+        }
+    }, [clientId, año, periodo, getClientFiles]);
+
 
     const handleFileChange = async (e) => {
         const selectedFiles = Array.from(e.target.files);
@@ -26,11 +41,24 @@ const FileUploadModal = ({ isOpen, onClose, onUpload, clientName }) => {
         );
 
         setFiles([...files, ...processedFiles]);
+
+        // Reset the file input so the same files can be selected again if needed
+        e.target.value = '';
     };
 
     const removeFile = (id) => {
         setFiles(files.filter(f => f.id !== id));
     };
+
+    const handleDeleteExistingFile = async (fileId) => {
+        if (window.confirm('¿Está seguro de eliminar este archivo?')) {
+            await deleteFileFromClient(clientId, fileId);
+            // Refresh existing files
+            const updatedFiles = getClientFiles(clientId, { año, periodo });
+            setExistingFiles(updatedFiles);
+        }
+    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -141,6 +169,40 @@ const FileUploadModal = ({ isOpen, onClose, onUpload, clientName }) => {
                             </div>
                         </div>
 
+                        {/* Existing Files */}
+                        {existingFiles.length > 0 && (
+                            <div className="space-y-2">
+                                <p className="label">Archivos Existentes ({existingFiles.length})</p>
+                                <div className="max-h-48 overflow-y-auto space-y-2">
+                                    {existingFiles.map((file) => (
+                                        <div
+                                            key={file.id}
+                                            className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200"
+                                        >
+                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                <File className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-sm font-medium text-slate-800 truncate">
+                                                        {file.nombre}
+                                                    </p>
+                                                    <p className="text-xs text-slate-500">
+                                                        {formatFileSize(file.tamaño)} • {file.año} - {file.periodo}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDeleteExistingFile(file.id)}
+                                                className="p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0"
+                                            >
+                                                <Trash2 className="w-4 h-4 text-red-600" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {/* File Upload Area */}
                         <div>
                             <label className="label">Archivos</label>
@@ -168,7 +230,7 @@ const FileUploadModal = ({ isOpen, onClose, onUpload, clientName }) => {
                         {/* File List */}
                         {files.length > 0 && (
                             <div className="space-y-2">
-                                <p className="label">Archivos seleccionados ({files.length})</p>
+                                <p className="label">Nuevos Archivos a Subir ({files.length})</p>
                                 <div className="max-h-48 overflow-y-auto space-y-2">
                                     {files.map((file) => (
                                         <div

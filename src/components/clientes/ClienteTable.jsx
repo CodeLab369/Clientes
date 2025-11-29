@@ -1,12 +1,24 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Search, Copy, Edit, Eye, Upload, Trash2, Check } from 'lucide-react';
+import { Plus, Search, Copy, Edit, Eye, Upload, Trash2, Check, FileText } from 'lucide-react';
 import { useClients } from '../../context/ClientContext';
 import ClienteModal from './ClienteModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import FileUploadModal from './FileUploadModal';
+import AnnotationsModal from './AnnotationsModal';
 
 const ClienteTable = () => {
-    const { clients, addClient, updateClient, deleteClient, addFileToClient, searchClients, filterByNitLastDigit } = useClients();
+    const {
+        clients,
+        addClient,
+        updateClient,
+        deleteClient,
+        addFileToClient,
+        searchClients,
+        filterByNitLastDigit,
+        addAnnotationToClient,
+        deleteAnnotationFromClient,
+        getClientAnnotations
+    } = useClients();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [nitFilter, setNitFilter] = useState('');
@@ -16,6 +28,7 @@ const ClienteTable = () => {
     const [modalState, setModalState] = useState({ isOpen: false, mode: 'create', client: null });
     const [deleteModal, setDeleteModal] = useState({ isOpen: false, client: null });
     const [uploadModal, setUploadModal] = useState({ isOpen: false, client: null });
+    const [annotationsModal, setAnnotationsModal] = useState({ isOpen: false, client: null });
 
     const [copiedField, setCopiedField] = useState(null);
 
@@ -95,6 +108,23 @@ const ClienteTable = () => {
             });
         }
     };
+
+    const handleAnnotationsClick = (client) => {
+        setAnnotationsModal({ isOpen: true, client });
+    };
+
+    const handleAddAnnotation = async (annotationData) => {
+        if (annotationsModal.client) {
+            await addAnnotationToClient(annotationsModal.client.id, annotationData);
+        }
+    };
+
+    const handleDeleteAnnotation = async (annotationId) => {
+        if (annotationsModal.client) {
+            await deleteAnnotationFromClient(annotationsModal.client.id, annotationId);
+        }
+    };
+
 
     const copyToClipboard = (text) => {
         // Try modern clipboard API first
@@ -315,6 +345,14 @@ const ClienteTable = () => {
                                                 </button>
 
                                                 <button
+                                                    onClick={() => handleAnnotationsClick(client)}
+                                                    className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors group"
+                                                    title="Anotaciones"
+                                                >
+                                                    <FileText className="w-4 h-4 text-slate-600 group-hover:text-indigo-600" />
+                                                </button>
+
+                                                <button
                                                     onClick={() => handleDeleteClick(client)}
                                                     className="p-1.5 hover:bg-red-100 rounded-lg transition-colors group"
                                                     title="Eliminar"
@@ -393,6 +431,17 @@ const ClienteTable = () => {
                 onClose={() => setUploadModal({ isOpen: false, client: null })}
                 onUpload={handleFileUpload}
                 clientName={uploadModal.client?.razonSocial}
+                clientId={uploadModal.client?.id}
+            />
+
+            <AnnotationsModal
+                isOpen={annotationsModal.isOpen}
+                onClose={() => setAnnotationsModal({ isOpen: false, client: null })}
+                clientId={annotationsModal.client?.id}
+                clientName={annotationsModal.client?.razonSocial}
+                annotations={annotationsModal.client ? getClientAnnotations(annotationsModal.client.id) : []}
+                onAddAnnotation={handleAddAnnotation}
+                onDeleteAnnotation={handleDeleteAnnotation}
             />
         </div>
     );

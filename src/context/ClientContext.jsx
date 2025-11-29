@@ -25,6 +25,7 @@ export const ClientProvider = ({ children }) => {
             id: Date.now().toString(36) + Math.random().toString(36).substr(2),
             ...clientData,
             archivos: [],
+            anotaciones: [],
             fechaCreacion: new Date().toISOString(),
         };
         setClients([...clients, newClient]);
@@ -136,6 +137,36 @@ export const ClientProvider = ({ children }) => {
         return result;
     };
 
+    const addAnnotationToClient = (clientId, annotationData) => {
+        setClients(clients.map(client => {
+            if (client.id === clientId) {
+                return {
+                    ...client,
+                    anotaciones: [...(client.anotaciones || []), annotationData]
+                };
+            }
+            return client;
+        }));
+    };
+
+    const deleteAnnotationFromClient = (clientId, annotationId) => {
+        setClients(clients.map(client => {
+            if (client.id === clientId) {
+                return {
+                    ...client,
+                    anotaciones: client.anotaciones.filter(annotation => annotation.id !== annotationId)
+                };
+            }
+            return client;
+        }));
+    };
+
+    const getClientAnnotations = (clientId) => {
+        const client = getClientById(clientId);
+        if (!client || !client.anotaciones) return [];
+        return client.anotaciones;
+    };
+
     const value = {
         clients,
         addClient,
@@ -148,6 +179,9 @@ export const ClientProvider = ({ children }) => {
         getAllClientFiles,
         searchClients,
         filterByNitLastDigit,
+        addAnnotationToClient,
+        deleteAnnotationFromClient,
+        getClientAnnotations,
     };
 
     return <ClientContext.Provider value={value}>{children}</ClientContext.Provider>;

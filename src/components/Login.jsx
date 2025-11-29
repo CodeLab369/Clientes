@@ -80,11 +80,6 @@ const Login = () => {
                             Iniciar Sesión
                         </button>
                     </form>
-
-                    {/* Footer hint */}
-                    <div className="mt-6 text-center text-xs text-slate-500">
-                        <p>Credenciales por defecto: Nestor / 1005</p>
-                    </div>
                 </div>
             </div>
         </div>

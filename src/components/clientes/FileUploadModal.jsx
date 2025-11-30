@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { X, Upload, File, Trash2 } from 'lucide-react';
 import { fileToBase64, formatFileSize, generateFileId } from '../../utils/fileUtils';
 import { useClients } from '../../context/ClientContext';
+import { useNotification } from '../../context/NotificationContext';
 
 const FileUploadModal = ({ isOpen, onClose, onUpload, clientName, clientId }) => {
     const { getClientFiles, deleteFileFromClient } = useClients();
+    const { showError, confirm } = useNotification();
 
     const [files, setFiles] = useState([]);
     const [existingFiles, setExistingFiles] = useState([]);
@@ -51,7 +53,8 @@ const FileUploadModal = ({ isOpen, onClose, onUpload, clientName, clientId }) =>
     };
 
     const handleDeleteExistingFile = async (fileId) => {
-        if (window.confirm('¿Está seguro de eliminar este archivo?')) {
+        const confirmed = await confirm('¿Está seguro de eliminar este archivo?', 'Confirmar Eliminación');
+        if (confirmed) {
             await deleteFileFromClient(clientId, fileId);
             // Refresh existing files
             const updatedFiles = getClientFiles(clientId, { año, periodo });
@@ -64,12 +67,12 @@ const FileUploadModal = ({ isOpen, onClose, onUpload, clientName, clientId }) =>
         e.preventDefault();
 
         if (files.length === 0) {
-            alert('Por favor seleccione al menos un archivo');
+            showError('Por favor seleccione al menos un archivo');
             return;
         }
 
         if (!año || !periodo) {
-            alert('Por favor complete año y periodo');
+            showError('Por favor complete año y periodo');
             return;
         }
 

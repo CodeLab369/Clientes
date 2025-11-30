@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, FileText } from 'lucide-react';
+import { useNotification } from '../../context/NotificationContext';
 
 const AnnotationsModal = ({ isOpen, onClose, clientId, clientName, annotations, onAddAnnotation, onDeleteAnnotation }) => {
     const [newAnnotation, setNewAnnotation] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { showError, confirm } = useNotification();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!newAnnotation.trim()) {
-            alert('Por favor ingrese una anotación');
+            showError('Por favor ingrese una anotación');
             return;
         }
 
@@ -27,7 +29,8 @@ const AnnotationsModal = ({ isOpen, onClose, clientId, clientName, annotations, 
     };
 
     const handleDelete = async (annotationId) => {
-        if (window.confirm('¿Está seguro de eliminar esta anotación?')) {
+        const confirmed = await confirm('¿Está seguro de eliminar esta anotación?', 'Confirmar Eliminación');
+        if (confirmed) {
             await onDeleteAnnotation(annotationId);
         }
     };

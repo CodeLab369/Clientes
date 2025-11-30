@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Plus, Search, Copy, Edit, Eye, Upload, Trash2, Check, FileText } from 'lucide-react';
 import { useClients } from '../../context/ClientContext';
+import { useNotification } from '../../context/NotificationContext';
 import ClienteModal from './ClienteModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import FileUploadModal from './FileUploadModal';
@@ -19,6 +20,7 @@ const ClienteTable = () => {
         deleteAnnotationFromClient,
         getClientAnnotations
     } = useClients();
+    const { showError } = useNotification();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [nitFilter, setNitFilter] = useState('');
@@ -184,7 +186,7 @@ const ClienteTable = () => {
             setTimeout(() => setCopiedField(null), 2000);
         } catch (err) {
             console.error('Failed to copy:', err);
-            alert('No se pudo copiar. Por favor, intenta de nuevo.');
+            showError('No se pudo copiar. Por favor, intenta de nuevo.');
         }
     };
 
@@ -195,7 +197,7 @@ const ClienteTable = () => {
             setTimeout(() => setCopiedField(null), 2000);
         } catch (err) {
             console.error('Failed to copy:', err);
-            alert('No se pudo copiar. Por favor, intenta de nuevo.');
+            showError('No se pudo copiar. Por favor, intenta de nuevo.');
         }
     };
 
@@ -206,7 +208,7 @@ const ClienteTable = () => {
             setTimeout(() => setCopiedField(null), 2000);
         } catch (err) {
             console.error('Failed to copy:', err);
-            alert('No se pudo copiar. Por favor, intenta de nuevo.');
+            showError('No se pudo copiar. Por favor, intenta de nuevo.');
         }
     };
 

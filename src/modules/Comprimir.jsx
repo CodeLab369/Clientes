@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Download, FileArchive, File, Calendar, User, Users } from 'lucide-react';
 import { useClients } from '../context/ClientContext';
+import { useNotification } from '../context/NotificationContext';
 import { compressFiles } from '../utils/compressionUtils';
 import { formatFileSize } from '../utils/fileUtils';
 import JSZip from 'jszip';
@@ -9,6 +10,7 @@ import { base64ToBlob } from '../utils/fileUtils';
 
 const Comprimir = () => {
     const { clients, getClientFiles, getAllClientFiles } = useClients();
+    const { showError, showSuccess } = useNotification();
 
     const [selectedClient, setSelectedClient] = useState('');
     const [selectedYear, setSelectedYear] = useState('');
@@ -84,7 +86,7 @@ const Comprimir = () => {
 
     const handleCompress = async () => {
         if (filteredData.files.length === 0) {
-            alert('No hay archivos para comprimir');
+            showError('No hay archivos para comprimir');
             return;
         }
 
@@ -117,7 +119,7 @@ const Comprimir = () => {
                 });
 
                 saveAs(content, zipName);
-                alert('Archivos comprimidos y descargados exitosamente');
+                showSuccess('Archivos comprimidos y descargados exitosamente');
             } else {
                 // Compress files from single client (existing behavior)
                 const clientName = selectedClientData?.razonSocial || 'cliente';
@@ -128,14 +130,14 @@ const Comprimir = () => {
                 const result = await compressFiles(filteredData.files, zipName);
 
                 if (result.success) {
-                    alert('Archivos comprimidos y descargados exitosamente');
+                    showSuccess('Archivos comprimidos y descargados exitosamente');
                 } else {
-                    alert('Error al comprimir archivos: ' + result.message);
+                    showError('Error al comprimir archivos: ' + result.message);
                 }
             }
         } catch (error) {
             console.error('Error compressing files:', error);
-            alert('Error al comprimir archivos');
+            showError('Error al comprimir archivos');
         }
 
         setCompressing(false);

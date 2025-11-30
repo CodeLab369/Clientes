@@ -161,6 +161,22 @@ export const ClientProvider = ({ children }) => {
         }));
     };
 
+    const updateAnnotationFromClient = (clientId, annotationId, updatedText) => {
+        setClients(clients.map(client => {
+            if (client.id === clientId) {
+                return {
+                    ...client,
+                    anotaciones: client.anotaciones.map(annotation =>
+                        annotation.id === annotationId
+                            ? { ...annotation, texto: updatedText, fechaModificacion: new Date().toISOString() }
+                            : annotation
+                    )
+                };
+            }
+            return client;
+        }));
+    };
+
     const getClientAnnotations = (clientId) => {
         const client = getClientById(clientId);
         if (!client || !client.anotaciones) return [];
@@ -181,6 +197,7 @@ export const ClientProvider = ({ children }) => {
         filterByNitLastDigit,
         addAnnotationToClient,
         deleteAnnotationFromClient,
+        updateAnnotationFromClient,
         getClientAnnotations,
     };
 

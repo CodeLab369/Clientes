@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, FileText } from 'lucide-react';
+import { X, Plus, Trash2, FileText, Edit2, Check, XCircle } from 'lucide-react';
 import { useNotification } from '../../context/NotificationContext';
 
-const AnnotationsModal = ({ isOpen, onClose, clientId, clientName, annotations, onAddAnnotation, onDeleteAnnotation }) => {
+const AnnotationsModal = ({ isOpen, onClose, clientId, clientName, annotations, onAddAnnotation, onDeleteAnnotation, onEditAnnotation }) => {
     const [newAnnotation, setNewAnnotation] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [editText, setEditText] = useState('');
     const { showError, confirm } = useNotification();
 
     const handleSubmit = async (e) => {
@@ -33,6 +35,27 @@ const AnnotationsModal = ({ isOpen, onClose, clientId, clientName, annotations, 
         if (confirmed) {
             await onDeleteAnnotation(annotationId);
         }
+    };
+
+    const handleEditStart = (annotation) => {
+        setEditingId(annotation.id);
+        setEditText(annotation.texto);
+    };
+
+    const handleEditCancel = () => {
+        setEditingId(null);
+        setEditText('');
+    };
+
+    const handleEditSave = async (annotationId) => {
+        if (!editText.trim()) {
+            showError('La anotación no puede estar vacía');
+            return;
+        }
+
+        await onEditAnnotation(annotationId, editText.trim());
+        setEditingId(null);
+        setEditText('');
     };
 
     const formatDate = (isoString) => {
@@ -83,23 +106,66 @@ const AnnotationsModal = ({ isOpen, onClose, clientId, clientName, annotations, 
                                         key={annotation.id}
                                         className="p-4 bg-slate-50 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
                                     >
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm text-slate-800 whitespace-pre-wrap break-words">
-                                                    {annotation.texto}
-                                                </p>
-                                                <p className="text-xs text-slate-500 mt-2">
-                                                    {formatDate(annotation.fecha)}
-                                                </p>
+                                        {editingId === annotation.id ? (
+                                            // Edit Mode
+                                            <div className="space-y-3">
+                                                <textarea
+                                                    value={editText}
+                                                    onChange={(e) => setEditText(e.target.value)}
+                                                    className="input-field min-h-[100px] resize-y w-full"
+                                                    autoFocus
+                                                />
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleEditSave(annotation.id)}
+                                                        className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1 text-sm"
+                                                    >
+                                                        <Check className="w-4 h-4" />
+                                                        Guardar
+                                                    </button>
+                                                    <button
+                                                        onClick={handleEditCancel}
+                                                        className="px-3 py-1.5 bg-slate-300 text-slate-700 rounded-lg hover:bg-slate-400 transition-colors flex items-center gap-1 text-sm"
+                                                    >
+                                                        <XCircle className="w-4 h-4" />
+                                                        Cancelar
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <button
-                                                onClick={() => handleDelete(annotation.id)}
-                                                className="p-1.5 hover:bg-red-100 rounded-lg transition-colors flex-shrink-0"
-                                                title="Eliminar anotación"
-                                            >
-                                                <Trash2 className="w-4 h-4 text-red-600" />
-                                            </button>
-                                        </div>
+                                        ) : (
+                                            // View Mode
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm text-slate-800 whitespace-pre-wrap break-words">
+                                                        {annotation.texto}
+                                                    </p>
+                                                    <p className="text-xs text-slate-500 mt-2">
+                                                        {formatDate(annotation.fecha)}
+                                                        {annotation.fechaModificacion && (
+                                                            <span className="ml-2 italic">
+                                                                (editado: {formatDate(annotation.fechaModificacion)})
+                                                            </span>
+                                                        )}
+                                                    </p>
+                                                </div>
+                                                <div className="flex gap-1 flex-shrink-0">
+                                                    <button
+                                                        onClick={() => handleEditStart(annotation)}
+                                                        className="p-1.5 hover:bg-blue-100 rounded-lg transition-colors"
+                                                        title="Editar anotación"
+                                                    >
+                                                        <Edit2 className="w-4 h-4 text-blue-600" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(annotation.id)}
+                                                        className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
+                                                        title="Eliminar anotación"
+                                                    >
+                                                        <Trash2 className="w-4 h-4 text-red-600" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>

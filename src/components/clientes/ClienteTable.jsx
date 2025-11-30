@@ -18,6 +18,7 @@ const ClienteTable = () => {
         filterByNitLastDigit,
         addAnnotationToClient,
         deleteAnnotationFromClient,
+        updateAnnotationFromClient,
         getClientAnnotations
     } = useClients();
     const { showError } = useNotification();
@@ -124,6 +125,12 @@ const ClienteTable = () => {
     const handleDeleteAnnotation = async (annotationId) => {
         if (annotationsModal.client) {
             await deleteAnnotationFromClient(annotationsModal.client.id, annotationId);
+        }
+    };
+
+    const handleEditAnnotation = async (annotationId, updatedText) => {
+        if (annotationsModal.client) {
+            await updateAnnotationFromClient(annotationsModal.client.id, annotationId, updatedText);
         }
     };
 
@@ -444,6 +451,7 @@ const ClienteTable = () => {
                 annotations={annotationsModal.client ? getClientAnnotations(annotationsModal.client.id) : []}
                 onAddAnnotation={handleAddAnnotation}
                 onDeleteAnnotation={handleDeleteAnnotation}
+                onEditAnnotation={handleEditAnnotation}
             />
         </div>
     );

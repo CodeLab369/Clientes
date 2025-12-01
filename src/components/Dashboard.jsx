@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import Clientes from '../modules/Clientes';
+import Unir from '../modules/Unir';
 import Comprimir from '../modules/Comprimir';
 import Configuracion from '../modules/Configuracion';
 
@@ -11,6 +12,8 @@ const Dashboard = () => {
         switch (currentModule) {
             case 'clientes':
                 return <Clientes />;
+            case 'unir':
+                return <Unir />;
             case 'comprimir':
                 return <Comprimir />;
             case 'configuracion':

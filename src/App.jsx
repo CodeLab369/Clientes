@@ -1,6 +1,7 @@
 import React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ClientProvider } from './context/ClientContext';
+import { MergedPDFProvider } from './context/MergedPDFContext';
 import { NotificationProvider, useNotification } from './context/NotificationContext';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
@@ -32,7 +33,9 @@ function App() {
     <AuthProvider>
       <NotificationProvider>
         <ClientProvider>
-          <AppContent />
+          <MergedPDFProvider>
+            <AppContent />
+          </MergedPDFProvider>
         </ClientProvider>
       </NotificationProvider>
     </AuthProvider>

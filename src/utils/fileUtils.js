@@ -51,3 +51,63 @@ export const downloadFile = (file) => {
     document.body.removeChild(link);
 };
 
+// PDF Merging utilities
+export const base64ToArrayBuffer = (base64) => {
+    const binaryString = atob(base64.split(',')[1]);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+};
+
+export const arrayBufferToBase64 = (buffer) => {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return 'data:application/pdf;base64,' + btoa(binary);
+};
+
+export const mergePDFs = async (pdfFiles) => {
+    const { PDFDocument } = await import('pdf-lib');
+
+    // Create a new PDF document
+    const mergedPdf = await PDFDocument.create();
+
+    // Iterate through each PDF file
+    for (const file of pdfFiles) {
+        // Convert base64 to ArrayBuffer
+        const pdfBytes = base64ToArrayBuffer(file.contenido);
+
+        // Load the PDF
+        const pdf = await PDFDocument.load(pdfBytes);
+
+        // Copy all pages from the current PDF
+        const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+
+        // Add each page to the merged PDF
+        copiedPages.forEach((page) => {
+            mergedPdf.addPage(page);
+        });
+    }
+
+    // Serialize the merged PDF to bytes
+    const mergedPdfBytes = await mergedPdf.save();
+
+    // Convert to base64
+    return arrayBufferToBase64(mergedPdfBytes);
+};
+
+export const generateMergedFileName = (clientNames) => {
+    const timestamp = new Date().toISOString().split('T')[0];
+    if (clientNames.length === 1) {
+        return `${clientNames[0]}_${timestamp}.pdf`;
+    } else if (clientNames.length === 2) {
+        return `${clientNames[0]}_${clientNames[1]}_${timestamp}.pdf`;
+    } else {
+        return `Fusionado_${clientNames.length}_clientes_${timestamp}.pdf`;
+    }
+};
+

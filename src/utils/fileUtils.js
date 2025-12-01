@@ -41,3 +41,13 @@ export const validateFileType = (file, allowedTypes = []) => {
 export const generateFileId = () => {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 };
+
+export const downloadFile = (file) => {
+    const link = document.createElement('a');
+    link.href = file.contenido;
+    link.download = file.nombre;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+

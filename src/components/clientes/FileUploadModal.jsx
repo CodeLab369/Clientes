@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, File, Trash2, Edit2 } from 'lucide-react';
-import { fileToBase64, formatFileSize, generateFileId } from '../../utils/fileUtils';
+import { X, Upload, File, Trash2, Edit2, Eye, Download } from 'lucide-react';
+import { fileToBase64, formatFileSize, generateFileId, downloadFile } from '../../utils/fileUtils';
 import { useClients } from '../../context/ClientContext';
 import { useNotification } from '../../context/NotificationContext';
+import FileViewerModal from './FileViewerModal';
 
 const FileUploadModal = ({ isOpen, onClose, onUpload, clientName, clientId }) => {
     const { getClientFiles, deleteFileFromClient } = useClients();
@@ -13,6 +14,8 @@ const FileUploadModal = ({ isOpen, onClose, onUpload, clientName, clientId }) =>
     const [año, setAño] = useState(new Date().getFullYear().toString());
     const [periodo, setPeriodo] = useState('');
     const [uploading, setUploading] = useState(false);
+    const [viewerOpen, setViewerOpen] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
 
     // Fetch existing files when year/period changes
     useEffect(() => {
@@ -64,6 +67,15 @@ const FileUploadModal = ({ isOpen, onClose, onUpload, clientName, clientId }) =>
             const updatedFiles = getClientFiles(clientId, { año, periodo });
             setExistingFiles(updatedFiles);
         }
+    };
+
+    const handleViewFile = (file) => {
+        setSelectedFile(file);
+        setViewerOpen(true);
+    };
+
+    const handleDownloadFile = (file) => {
+        downloadFile(file);
     };
 
 
@@ -197,13 +209,32 @@ const FileUploadModal = ({ isOpen, onClose, onUpload, clientName, clientId }) =>
                                                     </p>
                                                 </div>
                                             </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleDeleteExistingFile(file.id)}
-                                                className="p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0"
-                                            >
-                                                <Trash2 className="w-4 h-4 text-red-600" />
-                                            </button>
+                                            <div className="flex items-center gap-1 flex-shrink-0">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleViewFile(file)}
+                                                    className="p-1 hover:bg-blue-100 rounded transition-colors"
+                                                    title="Ver archivo"
+                                                >
+                                                    <Eye className="w-4 h-4 text-blue-600" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDownloadFile(file)}
+                                                    className="p-1 hover:bg-green-100 rounded transition-colors"
+                                                    title="Descargar archivo"
+                                                >
+                                                    <Download className="w-4 h-4 text-green-600" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDeleteExistingFile(file.id)}
+                                                    className="p-1 hover:bg-red-100 rounded transition-colors"
+                                                    title="Eliminar archivo"
+                                                >
+                                                    <Trash2 className="w-4 h-4 text-red-600" />
+                                                </button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -296,6 +327,13 @@ const FileUploadModal = ({ isOpen, onClose, onUpload, clientName, clientId }) =>
                     </div>
                 </form>
             </div>
+
+            {/* File Viewer Modal */}
+            <FileViewerModal
+                isOpen={viewerOpen}
+                onClose={() => setViewerOpen(false)}
+                file={selectedFile}
+            />
         </div>
     );
 };

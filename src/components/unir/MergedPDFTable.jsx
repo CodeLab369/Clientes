@@ -163,76 +163,97 @@ const MergedPDFTable = () => {
                                             <div className="flex items-center justify-center gap-2">
                                                 <button
                                                     onClick={() => handleView(pdf)}
-                                                    className="p-1.5 hover:bg-purple-100 rounded-lg transition-colors group"
+                                                    className="p-2 hover:bg-purple-100 rounded-lg transition-colors group"
                                                     title="Ver PDF"
                                                 >
                                                     <Eye className="w-4 h-4 text-slate-600 group-hover:text-purple-600" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDownload(pdf)}
+                                                    className="p-2 hover:bg-green-100 rounded-lg transition-colors group"
+                                                    title="Descargar PDF"
+                                                >
+                                                    <Download className="w-4 h-4 text-slate-600 group-hover:text-green-600" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(pdf)}
+                                                    onTouchStart={(e) => {
+                                                        e.currentTarget.classList.add('bg-red-200');
+                                                    }}
+                                                    onTouchEnd={(e) => {
+                                                        e.currentTarget.classList.remove('bg-red-200');
+                                                    }}
+                                                    className="p-2 hover:bg-red-100 active:bg-red-200 rounded-lg transition-colors group"
+                                                    style={{ WebkitTapHighlightColor: 'transparent' }}
+                                                    title="Eliminar"
+                                                >
+                                                    <Trash2 className="w-4 h-4 text-slate-600 group-hover:text-red-600" />
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
-                                            ))
+                                ))
                             )}
-                                        </tbody>
-                                    </table>
+                        </tbody>
+                    </table>
                 </div>
 
-                        {/* Pagination */}
-                        {mergedPDFs.length > 0 && (
-                            <div className="px-4 py-3 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-slate-600">Filas por página:</span>
-                                    <select
-                                        value={rowsPerPage}
-                                        onChange={(e) => setRowsPerPage(Number(e.target.value))}
-                                        className="input-field py-1 px-2 text-sm"
-                                    >
-                                        <option value={5}>5</option>
-                                        <option value={10}>10</option>
-                                        <option value={50}>50</option>
-                                    </select>
-                                </div>
+                {/* Pagination */}
+                {mergedPDFs.length > 0 && (
+                    <div className="px-4 py-3 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-slate-600">Filas por página:</span>
+                            <select
+                                value={rowsPerPage}
+                                onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                                className="input-field py-1 px-2 text-sm"
+                            >
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={50}>50</option>
+                            </select>
+                        </div>
 
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-slate-600">
-                                        Mostrando {((currentPage - 1) * rowsPerPage) + 1} - {Math.min(currentPage * rowsPerPage, mergedPDFs.length)} de {mergedPDFs.length}
-                                    </span>
-                                </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-slate-600">
+                                Mostrando {((currentPage - 1) * rowsPerPage) + 1} - {Math.min(currentPage * rowsPerPage, mergedPDFs.length)} de {mergedPDFs.length}
+                            </span>
+                        </div>
 
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                        disabled={currentPage === 1}
-                                        className="px-3 py-1 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                                    >
-                                        Anterior
-                                    </button>
-                                    <button
-                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                        disabled={currentPage === totalPages || totalPages === 0}
-                                        className="px-3 py-1 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                                    >
-                                        Siguiente
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                </div>
-
-                {/* Modals */}
-                <MergePDFModal
-                    isOpen={mergeModal}
-                    onClose={() => setMergeModal(false)}
-                    onMerge={handleMerge}
-                />
-
-                <MergedPDFViewerModal
-                    isOpen={viewerModal.isOpen}
-                    onClose={() => setViewerModal({ isOpen: false, pdf: null })}
-                    pdf={viewerModal.pdf}
-                />
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                disabled={currentPage === 1}
+                                className="px-3 py-1 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                            >
+                                Anterior
+                            </button>
+                            <button
+                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                disabled={currentPage === totalPages || totalPages === 0}
+                                className="px-3 py-1 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
-            );
+
+            {/* Modals */}
+            <MergePDFModal
+                isOpen={mergeModal}
+                onClose={() => setMergeModal(false)}
+                onMerge={handleMerge}
+            />
+
+            <MergedPDFViewerModal
+                isOpen={viewerModal.isOpen}
+                onClose={() => setViewerModal({ isOpen: false, pdf: null })}
+                pdf={viewerModal.pdf}
+            />
+        </div>
+    );
 };
 
-            export default MergedPDFTable;
+export default MergedPDFTable;

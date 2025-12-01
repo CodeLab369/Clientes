@@ -3,7 +3,7 @@ import { Download, FileArchive, File, Calendar, User, Users } from 'lucide-react
 import { useClients } from '../context/ClientContext';
 import { useNotification } from '../context/NotificationContext';
 import { compressFiles } from '../utils/compressionUtils';
-import { formatFileSize } from '../utils/fileUtils';
+import { formatFileSize, sortPeriods } from '../utils/fileUtils';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { base64ToBlob } from '../utils/fileUtils';
@@ -57,7 +57,7 @@ const Comprimir = () => {
             }
         }
 
-        return Array.from(periods);
+        return sortPeriods(Array.from(periods));
     }, [clients, selectedClient, selectedYear, isAllClients]);
 
     // Get filtered files

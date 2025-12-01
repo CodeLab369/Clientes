@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { X, FileText, Plus, Minus } from 'lucide-react';
 import { useClients } from '../../context/ClientContext';
 import { useNotification } from '../../context/NotificationContext';
-import { mergePDFs, generateMergedFileName } from '../../utils/fileUtils';
+import { mergePDFs, generateMergedFileName, sortPeriods } from '../../utils/fileUtils';
 
 const MergePDFModal = ({ isOpen, onClose, onMerge }) => {
     const { clients } = useClients();
@@ -30,7 +30,7 @@ const MergePDFModal = ({ isOpen, onClose, onMerge }) => {
 
         return {
             years: Array.from(yearsSet).sort((a, b) => b - a),
-            periods: Array.from(periodsSet).sort()
+            periods: sortPeriods(Array.from(periodsSet))
         };
     }, [clients]);
 

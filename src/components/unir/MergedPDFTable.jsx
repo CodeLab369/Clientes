@@ -176,8 +176,18 @@ const MergedPDFTable = () => {
                                                     <Download className="w-4 h-4 text-slate-600 group-hover:text-green-600" />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(pdf)}
-                                                    className="p-1.5 hover:bg-red-100 rounded-lg transition-colors group"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        handleDelete(pdf);
+                                                    }}
+                                                    onTouchEnd={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        handleDelete(pdf);
+                                                    }}
+                                                    className="p-1.5 hover:bg-red-100 active:bg-red-200 rounded-lg transition-colors group touch-manipulation"
+                                                    style={{ touchAction: 'manipulation' }}
                                                     title="Eliminar"
                                                 >
                                                     <Trash2 className="w-4 h-4 text-slate-600 group-hover:text-red-600" />

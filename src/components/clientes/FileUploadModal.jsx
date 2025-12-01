@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, File, Trash2 } from 'lucide-react';
+import { X, Upload, File, Trash2, Edit2 } from 'lucide-react';
 import { fileToBase64, formatFileSize, generateFileId } from '../../utils/fileUtils';
 import { useClients } from '../../context/ClientContext';
 import { useNotification } from '../../context/NotificationContext';
@@ -50,6 +50,10 @@ const FileUploadModal = ({ isOpen, onClose, onUpload, clientName, clientId }) =>
 
     const removeFile = (id) => {
         setFiles(files.filter(f => f.id !== id));
+    };
+
+    const handleFileNameChange = (id, newName) => {
+        setFiles(files.map(f => f.id === id ? { ...f, nombre: newName } : f));
     };
 
     const handleDeleteExistingFile = async (fileId) => {
@@ -243,10 +247,17 @@ const FileUploadModal = ({ isOpen, onClose, onUpload, clientName, clientId }) =>
                                             <div className="flex items-center gap-3 flex-1 min-w-0">
                                                 <File className="w-5 h-5 text-primary-500 flex-shrink-0" />
                                                 <div className="min-w-0 flex-1">
-                                                    <p className="text-sm font-medium text-slate-800 truncate">
-                                                        {file.nombre}
-                                                    </p>
-                                                    <p className="text-xs text-slate-500">
+                                                    <div className="flex items-center gap-2">
+                                                        <Edit2 className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                                                        <input
+                                                            type="text"
+                                                            value={file.nombre}
+                                                            onChange={(e) => handleFileNameChange(file.id, e.target.value)}
+                                                            className="text-sm font-medium text-slate-800 bg-transparent border-b border-transparent hover:border-primary-300 focus:border-primary-500 focus:outline-none transition-colors w-full"
+                                                            placeholder="Nombre del archivo"
+                                                        />
+                                                    </div>
+                                                    <p className="text-xs text-slate-500 mt-1">
                                                         {formatFileSize(file.tamaño)}
                                                     </p>
                                                 </div>

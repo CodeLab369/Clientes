@@ -8,7 +8,7 @@ import MergedPDFViewerModal from './MergedPDFViewerModal';
 
 const MergedPDFTable = () => {
     const { mergedPDFs, addMergedPDF, clearAllMergedPDFs } = useMergedPDFs();
-    const { showSuccess, showConfirm } = useNotification();
+    const { showSuccess, confirm } = useNotification();
 
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -47,7 +47,7 @@ const MergedPDFTable = () => {
     };
 
     const handleClearAll = async () => {
-        const confirmed = await showConfirm(
+        const confirmed = await confirm(
             'Vaciar lista de PDFs fusionados',
             `¿Estás seguro de que deseas eliminar TODOS los PDFs fusionados (${mergedPDFs.length})? Esta acción no se puede deshacer.`
         );
@@ -63,9 +63,10 @@ const MergedPDFTable = () => {
             {/* Header Actions */}
             <div className="flex justify-between items-center">
                 <button
+                    type="button"
                     onClick={handleClearAll}
                     disabled={mergedPDFs.length === 0}
-                    className="btn-secondary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn-secondary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                     title="Vaciar lista"
                 >
                     <Trash2 className="w-5 h-5" />

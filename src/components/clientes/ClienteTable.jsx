@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Search, Copy, Edit, Eye, Upload, Trash2, Check, FileText } from 'lucide-react';
+import { Plus, Search, Copy, Edit, Eye, Upload, Trash2, Check, FileText, Tag } from 'lucide-react';
 import { useClients } from '../../context/ClientContext';
 import { useNotification } from '../../context/NotificationContext';
 import ClienteModal from './ClienteModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import FileUploadModal from './FileUploadModal';
 import AnnotationsModal from './AnnotationsModal';
+import ControlMarksModal from './ControlMarksModal';
 
 const ClienteTable = () => {
     const {
@@ -19,7 +20,9 @@ const ClienteTable = () => {
         addAnnotationToClient,
         deleteAnnotationFromClient,
         updateAnnotationFromClient,
-        getClientAnnotations
+        getClientAnnotations,
+        assignMarksToClient,
+        getClientMarks
     } = useClients();
     const { showError } = useNotification();
 
@@ -32,6 +35,7 @@ const ClienteTable = () => {
     const [deleteModal, setDeleteModal] = useState({ isOpen: false, client: null });
     const [uploadModal, setUploadModal] = useState({ isOpen: false, client: null });
     const [annotationsModal, setAnnotationsModal] = useState({ isOpen: false, client: null });
+    const [controlMarksModal, setControlMarksModal] = useState({ isOpen: false, client: null });
 
     const [copiedField, setCopiedField] = useState(null);
 
@@ -131,6 +135,16 @@ const ClienteTable = () => {
     const handleEditAnnotation = async (annotationId, updatedText) => {
         if (annotationsModal.client) {
             await updateAnnotationFromClient(annotationsModal.client.id, annotationId, updatedText);
+        }
+    };
+
+    const handleControlMarksClick = (client) => {
+        setControlMarksModal({ isOpen: true, client });
+    };
+
+    const handleSaveControlMarks = (marksArray) => {
+        if (controlMarksModal.client) {
+            assignMarksToClient(controlMarksModal.client.id, marksArray);
         }
     };
 
@@ -266,7 +280,7 @@ const ClienteTable = () => {
                             <tr>
                                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">NIT</th>
                                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Razón Social</th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Correo</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Marcas de Control</th>
                                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Contacto</th>
                                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Archivos</th>
                                 <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Acciones</th>
@@ -280,98 +294,131 @@ const ClienteTable = () => {
                                     </td>
                                 </tr>
                             ) : (
-                                paginatedClients.map((client) => (
-                                    <tr key={client.id} className="hover:bg-slate-50 transition-colors">
-                                        <td className="px-4 py-3 text-sm text-slate-900 font-medium">{client.nit}</td>
-                                        <td className="px-4 py-3 text-sm text-slate-900">{client.razonSocial}</td>
-                                        <td className="px-4 py-3 text-sm text-slate-600">{client.correo}</td>
-                                        <td className="px-4 py-3 text-sm text-slate-600">{client.contacto || '-'}</td>
-                                        <td className="px-4 py-3 text-sm text-slate-600">
-                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-700">
-                                                {client.archivos?.length || 0} archivo(s)
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center justify-center gap-2">
-                                                <button
-                                                    onClick={() => handleCopyNit(client)}
-                                                    className="p-1.5 hover:bg-green-100 rounded-lg transition-colors group relative"
-                                                    title="Copiar NIT"
-                                                >
-                                                    {copiedField === `${client.id}-nit` ? (
-                                                        <Check className="w-4 h-4 text-green-600" />
-                                                    ) : (
-                                                        <Copy className="w-4 h-4 text-slate-600 group-hover:text-green-600" />
-                                                    )}
-                                                </button>
+                                paginatedClients.map((client) => {
+                                    const clientMarks = getClientMarks(client.id);
+                                    return (
+                                        <tr key={client.id} className="hover:bg-slate-50 transition-colors">
+                                            <td className="px-4 py-3 text-sm text-slate-900 font-medium">{client.nit}</td>
+                                            <td className="px-4 py-3 text-sm text-slate-900">{client.razonSocial}</td>
+                                            <td className="px-4 py-3 text-sm">
+                                                {clientMarks.length === 0 ? (
+                                                    <span className="text-slate-400 text-xs">Sin marcas</span>
+                                                ) : (
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {clientMarks.slice(0, 2).map((mark, idx) => (
+                                                            <span
+                                                                key={`${mark.marcaId}-${mark.submarcaId || 'main'}-${idx}`}
+                                                                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white"
+                                                                style={{ backgroundColor: mark.marcaColor }}
+                                                                title={`${mark.marcaNombre}${mark.submarcaNombre ? ' - ' + mark.submarcaNombre : ''}`}
+                                                            >
+                                                                {mark.marcaNombre}{mark.submarcaNombre ? ` - ${mark.submarcaNombre}` : ''}
+                                                            </span>
+                                                        ))}
+                                                        {clientMarks.length > 2 && (
+                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-200 text-slate-700">
+                                                                +{clientMarks.length - 2} más
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-3 text-sm text-slate-600">{client.contacto || '-'}</td>
+                                            <td className="px-4 py-3 text-sm text-slate-600">
+                                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-700">
+                                                    {client.archivos?.length || 0} archivo(s)
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <button
+                                                        onClick={() => handleControlMarksClick(client)}
+                                                        className="p-1.5 hover:bg-amber-100 rounded-lg transition-colors group"
+                                                        title="Marcas de Control"
+                                                    >
+                                                        <Tag className="w-4 h-4 text-slate-600 group-hover:text-amber-600" />
+                                                    </button>
 
-                                                <button
-                                                    onClick={() => handleCopyEmail(client)}
-                                                    className="p-1.5 hover:bg-blue-100 rounded-lg transition-colors group relative"
-                                                    title="Copiar Correo"
-                                                >
-                                                    {copiedField === `${client.id}-email` ? (
-                                                        <Check className="w-4 h-4 text-blue-600" />
-                                                    ) : (
-                                                        <Copy className="w-4 h-4 text-slate-600 group-hover:text-blue-600" />
-                                                    )}
-                                                </button>
+                                                    <button
+                                                        onClick={() => handleCopyNit(client)}
+                                                        className="p-1.5 hover:bg-green-100 rounded-lg transition-colors group relative"
+                                                        title="Copiar NIT"
+                                                    >
+                                                        {copiedField === `${client.id}-nit` ? (
+                                                            <Check className="w-4 h-4 text-green-600" />
+                                                        ) : (
+                                                            <Copy className="w-4 h-4 text-slate-600 group-hover:text-green-600" />
+                                                        )}
+                                                    </button>
 
-                                                <button
-                                                    onClick={() => handleCopyPassword(client)}
-                                                    className="p-1.5 hover:bg-purple-100 rounded-lg transition-colors group relative"
-                                                    title="Copiar Contraseña"
-                                                >
-                                                    {copiedField === `${client.id}-password` ? (
-                                                        <Check className="w-4 h-4 text-purple-600" />
-                                                    ) : (
-                                                        <Copy className="w-4 h-4 text-slate-600 group-hover:text-purple-600" />
-                                                    )}
-                                                </button>
+                                                    <button
+                                                        onClick={() => handleCopyEmail(client)}
+                                                        className="p-1.5 hover:bg-blue-100 rounded-lg transition-colors group relative"
+                                                        title="Copiar Correo"
+                                                    >
+                                                        {copiedField === `${client.id}-email` ? (
+                                                            <Check className="w-4 h-4 text-blue-600" />
+                                                        ) : (
+                                                            <Copy className="w-4 h-4 text-slate-600 group-hover:text-blue-600" />
+                                                        )}
+                                                    </button>
 
-                                                <button
-                                                    onClick={() => handleEditClient(client)}
-                                                    className="p-1.5 hover:bg-blue-100 rounded-lg transition-colors group"
-                                                    title="Editar"
-                                                >
-                                                    <Edit className="w-4 h-4 text-slate-600 group-hover:text-blue-600" />
-                                                </button>
+                                                    <button
+                                                        onClick={() => handleCopyPassword(client)}
+                                                        className="p-1.5 hover:bg-purple-100 rounded-lg transition-colors group relative"
+                                                        title="Copiar Contraseña"
+                                                    >
+                                                        {copiedField === `${client.id}-password` ? (
+                                                            <Check className="w-4 h-4 text-purple-600" />
+                                                        ) : (
+                                                            <Copy className="w-4 h-4 text-slate-600 group-hover:text-purple-600" />
+                                                        )}
+                                                    </button>
 
-                                                <button
-                                                    onClick={() => handleViewClient(client)}
-                                                    className="p-1.5 hover:bg-purple-100 rounded-lg transition-colors group"
-                                                    title="Ver detalles"
-                                                >
-                                                    <Eye className="w-4 h-4 text-slate-600 group-hover:text-purple-600" />
-                                                </button>
+                                                    <button
+                                                        onClick={() => handleEditClient(client)}
+                                                        className="p-1.5 hover:bg-blue-100 rounded-lg transition-colors group"
+                                                        title="Editar"
+                                                    >
+                                                        <Edit className="w-4 h-4 text-slate-600 group-hover:text-blue-600" />
+                                                    </button>
 
-                                                <button
-                                                    onClick={() => handleUploadClick(client)}
-                                                    className="p-1.5 hover:bg-yellow-100 rounded-lg transition-colors group"
-                                                    title="Subir archivos"
-                                                >
-                                                    <Upload className="w-4 h-4 text-slate-600 group-hover:text-yellow-600" />
-                                                </button>
+                                                    <button
+                                                        onClick={() => handleViewClient(client)}
+                                                        className="p-1.5 hover:bg-purple-100 rounded-lg transition-colors group"
+                                                        title="Ver detalles"
+                                                    >
+                                                        <Eye className="w-4 h-4 text-slate-600 group-hover:text-purple-600" />
+                                                    </button>
 
-                                                <button
-                                                    onClick={() => handleAnnotationsClick(client)}
-                                                    className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors group"
-                                                    title="Anotaciones"
-                                                >
-                                                    <FileText className="w-4 h-4 text-slate-600 group-hover:text-indigo-600" />
-                                                </button>
+                                                    <button
+                                                        onClick={() => handleUploadClick(client)}
+                                                        className="p-1.5 hover:bg-yellow-100 rounded-lg transition-colors group"
+                                                        title="Subir archivos"
+                                                    >
+                                                        <Upload className="w-4 h-4 text-slate-600 group-hover:text-yellow-600" />
+                                                    </button>
 
-                                                <button
-                                                    onClick={() => handleDeleteClick(client)}
-                                                    className="p-1.5 hover:bg-red-100 rounded-lg transition-colors group"
-                                                    title="Eliminar"
-                                                >
-                                                    <Trash2 className="w-4 h-4 text-slate-600 group-hover:text-red-600" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                                                    <button
+                                                        onClick={() => handleAnnotationsClick(client)}
+                                                        className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors group"
+                                                        title="Anotaciones"
+                                                    >
+                                                        <FileText className="w-4 h-4 text-slate-600 group-hover:text-indigo-600" />
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => handleDeleteClick(client)}
+                                                        className="p-1.5 hover:bg-red-100 rounded-lg transition-colors group"
+                                                        title="Eliminar"
+                                                    >
+                                                        <Trash2 className="w-4 h-4 text-slate-600 group-hover:text-red-600" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>
@@ -452,6 +499,15 @@ const ClienteTable = () => {
                 onAddAnnotation={handleAddAnnotation}
                 onDeleteAnnotation={handleDeleteAnnotation}
                 onEditAnnotation={handleEditAnnotation}
+            />
+
+            <ControlMarksModal
+                isOpen={controlMarksModal.isOpen}
+                onClose={() => setControlMarksModal({ isOpen: false, client: null })}
+                onSave={handleSaveControlMarks}
+                clientId={controlMarksModal.client?.id}
+                clientName={controlMarksModal.client?.razonSocial}
+                currentMarks={controlMarksModal.client ? (controlMarksModal.client.marcasAsignadas || []) : []}
             />
         </div>
     );

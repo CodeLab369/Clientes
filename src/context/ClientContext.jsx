@@ -183,6 +183,49 @@ export const ClientProvider = ({ children }) => {
         return client.anotaciones;
     };
 
+    // Funciones para gestión de marcas de control
+    const assignMarksToClient = (clientId, marksArray) => {
+        setClients(clients.map(client => {
+            if (client.id === clientId) {
+                return {
+                    ...client,
+                    marcasAsignadas: marksArray
+                };
+            }
+            return client;
+        }));
+    };
+
+    const getClientMarks = (clientId) => {
+        const client = getClientById(clientId);
+        if (!client || !client.marcasAsignadas) return [];
+
+        // Obtener marcas globales del localStorage
+        const storedMarks = localStorage.getItem('controlMarks');
+        if (!storedMarks) return [];
+
+        const globalMarks = JSON.parse(storedMarks);
+
+        // Mapear las marcas asignadas con sus detalles completos
+        return client.marcasAsignadas.map(assigned => {
+            const mark = globalMarks.find(m => m.id === assigned.marcaId);
+            if (!mark) return null;
+
+            const submarca = assigned.submarcaId
+                ? mark.submarcas?.find(sm => sm.id === assigned.submarcaId)
+                : null;
+
+            return {
+                marcaId: mark.id,
+                marcaNombre: mark.nombre,
+                marcaColor: mark.color,
+                submarcaId: submarca?.id || null,
+                submarcaNombre: submarca?.nombre || null
+            };
+        }).filter(Boolean); // Filtrar nulls
+    };
+
+
     const value = {
         clients,
         addClient,
@@ -199,6 +242,8 @@ export const ClientProvider = ({ children }) => {
         deleteAnnotationFromClient,
         updateAnnotationFromClient,
         getClientAnnotations,
+        assignMarksToClient,
+        getClientMarks,
     };
 
     return <ClientContext.Provider value={value}>{children}</ClientContext.Provider>;

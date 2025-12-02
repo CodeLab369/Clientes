@@ -75,7 +75,7 @@ const ClienteTable = () => {
         setCurrentPage(1);
     }, [searchTerm, nitFilter, rowsPerPage]);
 
-    // Close dropdown when clicking outside or when modals open
+    // Close dropdown when clicking/tapping outside or when modals open
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -88,24 +88,28 @@ const ClienteTable = () => {
         };
 
         if (openCopyDropdown !== null) {
+            // Add both mouse and touch event listeners for cross-device compatibility
             document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('touchstart', handleClickOutside);
             window.addEventListener('scroll', handleScroll, true);
         }
 
         return () => {
+            // Clean up both event listeners
             document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
             window.removeEventListener('scroll', handleScroll, true);
         };
     }, [openCopyDropdown]);
 
     // Close dropdown when any modal opens
     useEffect(() => {
-        if (modalState.isOpen || deleteModal.isOpen || uploadModal.isOpen || 
+        if (modalState.isOpen || deleteModal.isOpen || uploadModal.isOpen ||
             annotationsModal.isOpen || controlMarksModal.isOpen) {
             setOpenCopyDropdown(null);
         }
-    }, [modalState.isOpen, deleteModal.isOpen, uploadModal.isOpen, 
-        annotationsModal.isOpen, controlMarksModal.isOpen]);
+    }, [modalState.isOpen, deleteModal.isOpen, uploadModal.isOpen,
+    annotationsModal.isOpen, controlMarksModal.isOpen]);
 
     const handleAddClient = () => {
         setModalState({ isOpen: true, mode: 'create', client: null });

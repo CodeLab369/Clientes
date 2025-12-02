@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Plus, Search, Copy, Edit, Eye, Upload, Trash2, Check, FileText, Tag } from 'lucide-react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { Plus, Search, Copy, Edit, Eye, Upload, Trash2, Check, FileText, Tag, ChevronDown } from 'lucide-react';
 import { useClients } from '../../context/ClientContext';
 import { useNotification } from '../../context/NotificationContext';
 import ClienteModal from './ClienteModal';
@@ -38,6 +38,8 @@ const ClienteTable = () => {
     const [controlMarksModal, setControlMarksModal] = useState({ isOpen: false, client: null });
 
     const [copiedField, setCopiedField] = useState(null);
+    const [openCopyDropdown, setOpenCopyDropdown] = useState(null);
+    const dropdownRef = useRef(null);
 
     // Filter and search clients
     const filteredClients = useMemo(() => {
@@ -367,44 +369,65 @@ const ClienteTable = () => {
                                                         <Tag className="w-4 h-4 text-slate-600 group-hover:text-amber-600" />
                                                     </button>
 
-                                                    {/* Copiar NIT */}
-                                                    <button
-                                                        onClick={() => handleCopyNit(client)}
-                                                        className="p-1.5 hover:bg-green-100 rounded-lg transition-colors group relative"
-                                                        title="Copiar NIT"
-                                                    >
-                                                        {copiedField === `${client.id}-nit` ? (
-                                                            <Check className="w-4 h-4 text-green-600" />
-                                                        ) : (
-                                                            <Copy className="w-4 h-4 text-slate-600 group-hover:text-green-600" />
-                                                        )}
-                                                    </button>
+                                                    {/* Copiar - Dropdown */}
+                                                    <div className="relative" ref={openCopyDropdown === client.id ? dropdownRef : null}>
+                                                        <button
+                                                            onClick={() => setOpenCopyDropdown(openCopyDropdown === client.id ? null : client.id)}
+                                                            className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors group flex items-center gap-0.5"
+                                                            title="Copiar credenciales"
+                                                        >
+                                                            <Copy className="w-4 h-4 text-slate-600 group-hover:text-slate-800" />
+                                                            <ChevronDown className="w-3 h-3 text-slate-600 group-hover:text-slate-800" />
+                                                        </button>
 
-                                                    {/* Copiar Email */}
-                                                    <button
-                                                        onClick={() => handleCopyEmail(client)}
-                                                        className="p-1.5 hover:bg-blue-100 rounded-lg transition-colors group relative"
-                                                        title="Copiar Correo"
-                                                    >
-                                                        {copiedField === `${client.id}-email` ? (
-                                                            <Check className="w-4 h-4 text-blue-600" />
-                                                        ) : (
-                                                            <Copy className="w-4 h-4 text-slate-600 group-hover:text-blue-600" />
+                                                        {/* Dropdown Menu */}
+                                                        {openCopyDropdown === client.id && (
+                                                            <div className="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-slate-200 z-50 py-1">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        handleCopyNit(client);
+                                                                        setOpenCopyDropdown(null);
+                                                                    }}
+                                                                    className="w-full px-3 py-2 text-left text-sm hover:bg-green-50 transition-colors flex items-center gap-2"
+                                                                >
+                                                                    {copiedField === `${client.id}-nit` ? (
+                                                                        <Check className="w-4 h-4 text-green-600" />
+                                                                    ) : (
+                                                                        <Copy className="w-4 h-4 text-green-600" />
+                                                                    )}
+                                                                    <span className="text-slate-700">Copiar NIT</span>
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        handleCopyEmail(client);
+                                                                        setOpenCopyDropdown(null);
+                                                                    }}
+                                                                    className="w-full px-3 py-2 text-left text-sm hover:bg-blue-50 transition-colors flex items-center gap-2"
+                                                                >
+                                                                    {copiedField === `${client.id}-email` ? (
+                                                                        <Check className="w-4 h-4 text-blue-600" />
+                                                                    ) : (
+                                                                        <Copy className="w-4 h-4 text-blue-600" />
+                                                                    )}
+                                                                    <span className="text-slate-700">Copiar Correo</span>
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        handleCopyPassword(client);
+                                                                        setOpenCopyDropdown(null);
+                                                                    }}
+                                                                    className="w-full px-3 py-2 text-left text-sm hover:bg-purple-50 transition-colors flex items-center gap-2"
+                                                                >
+                                                                    {copiedField === `${client.id}-password` ? (
+                                                                        <Check className="w-4 h-4 text-purple-600" />
+                                                                    ) : (
+                                                                        <Copy className="w-4 h-4 text-purple-600" />
+                                                                    )}
+                                                                    <span className="text-slate-700">Copiar Contraseña</span>
+                                                                </button>
+                                                            </div>
                                                         )}
-                                                    </button>
-
-                                                    {/* Copiar Contraseña */}
-                                                    <button
-                                                        onClick={() => handleCopyPassword(client)}
-                                                        className="p-1.5 hover:bg-purple-100 rounded-lg transition-colors group relative"
-                                                        title="Copiar Contraseña"
-                                                    >
-                                                        {copiedField === `${client.id}-password` ? (
-                                                            <Check className="w-4 h-4 text-purple-600" />
-                                                        ) : (
-                                                            <Copy className="w-4 h-4 text-slate-600 group-hover:text-purple-600" />
-                                                        )}
-                                                    </button>
+                                                    </div>
 
                                                     {/* Editar */}
                                                     <button

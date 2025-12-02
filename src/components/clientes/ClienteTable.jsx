@@ -331,6 +331,34 @@ const ClienteTable = () => {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center justify-center gap-2">
+                                                    {/* Ver Cliente */}
+                                                    <button
+                                                        onClick={() => handleViewClient(client)}
+                                                        className="p-1.5 hover:bg-purple-100 rounded-lg transition-colors group"
+                                                        title="Ver detalles"
+                                                    >
+                                                        <Eye className="w-4 h-4 text-slate-600 group-hover:text-purple-600" />
+                                                    </button>
+
+                                                    {/* Anotaciones */}
+                                                    <button
+                                                        onClick={() => handleAnnotationsClick(client)}
+                                                        className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors group"
+                                                        title="Anotaciones"
+                                                    >
+                                                        <FileText className="w-4 h-4 text-slate-600 group-hover:text-indigo-600" />
+                                                    </button>
+
+                                                    {/* Subir Archivos */}
+                                                    <button
+                                                        onClick={() => handleUploadClick(client)}
+                                                        className="p-1.5 hover:bg-yellow-100 rounded-lg transition-colors group"
+                                                        title="Subir archivos"
+                                                    >
+                                                        <Upload className="w-4 h-4 text-slate-600 group-hover:text-yellow-600" />
+                                                    </button>
+
+                                                    {/* Marcas de Control */}
                                                     <button
                                                         onClick={() => handleControlMarksClick(client)}
                                                         className="p-1.5 hover:bg-amber-100 rounded-lg transition-colors group"
@@ -339,6 +367,7 @@ const ClienteTable = () => {
                                                         <Tag className="w-4 h-4 text-slate-600 group-hover:text-amber-600" />
                                                     </button>
 
+                                                    {/* Copiar NIT */}
                                                     <button
                                                         onClick={() => handleCopyNit(client)}
                                                         className="p-1.5 hover:bg-green-100 rounded-lg transition-colors group relative"
@@ -351,6 +380,7 @@ const ClienteTable = () => {
                                                         )}
                                                     </button>
 
+                                                    {/* Copiar Email */}
                                                     <button
                                                         onClick={() => handleCopyEmail(client)}
                                                         className="p-1.5 hover:bg-blue-100 rounded-lg transition-colors group relative"
@@ -363,6 +393,7 @@ const ClienteTable = () => {
                                                         )}
                                                     </button>
 
+                                                    {/* Copiar Contraseña */}
                                                     <button
                                                         onClick={() => handleCopyPassword(client)}
                                                         className="p-1.5 hover:bg-purple-100 rounded-lg transition-colors group relative"
@@ -375,6 +406,7 @@ const ClienteTable = () => {
                                                         )}
                                                     </button>
 
+                                                    {/* Editar */}
                                                     <button
                                                         onClick={() => handleEditClient(client)}
                                                         className="p-1.5 hover:bg-blue-100 rounded-lg transition-colors group"
@@ -383,30 +415,7 @@ const ClienteTable = () => {
                                                         <Edit className="w-4 h-4 text-slate-600 group-hover:text-blue-600" />
                                                     </button>
 
-                                                    <button
-                                                        onClick={() => handleViewClient(client)}
-                                                        className="p-1.5 hover:bg-purple-100 rounded-lg transition-colors group"
-                                                        title="Ver detalles"
-                                                    >
-                                                        <Eye className="w-4 h-4 text-slate-600 group-hover:text-purple-600" />
-                                                    </button>
-
-                                                    <button
-                                                        onClick={() => handleUploadClick(client)}
-                                                        className="p-1.5 hover:bg-yellow-100 rounded-lg transition-colors group"
-                                                        title="Subir archivos"
-                                                    >
-                                                        <Upload className="w-4 h-4 text-slate-600 group-hover:text-yellow-600" />
-                                                    </button>
-
-                                                    <button
-                                                        onClick={() => handleAnnotationsClick(client)}
-                                                        className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors group"
-                                                        title="Anotaciones"
-                                                    >
-                                                        <FileText className="w-4 h-4 text-slate-600 group-hover:text-indigo-600" />
-                                                    </button>
-
+                                                    {/* Eliminar */}
                                                     <button
                                                         onClick={() => handleDeleteClick(client)}
                                                         className="p-1.5 hover:bg-red-100 rounded-lg transition-colors group"

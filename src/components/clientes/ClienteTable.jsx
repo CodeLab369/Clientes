@@ -75,6 +75,38 @@ const ClienteTable = () => {
         setCurrentPage(1);
     }, [searchTerm, nitFilter, rowsPerPage]);
 
+    // Close dropdown when clicking outside or when modals open
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setOpenCopyDropdown(null);
+            }
+        };
+
+        const handleScroll = () => {
+            setOpenCopyDropdown(null);
+        };
+
+        if (openCopyDropdown !== null) {
+            document.addEventListener('mousedown', handleClickOutside);
+            window.addEventListener('scroll', handleScroll, true);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            window.removeEventListener('scroll', handleScroll, true);
+        };
+    }, [openCopyDropdown]);
+
+    // Close dropdown when any modal opens
+    useEffect(() => {
+        if (modalState.isOpen || deleteModal.isOpen || uploadModal.isOpen || 
+            annotationsModal.isOpen || controlMarksModal.isOpen) {
+            setOpenCopyDropdown(null);
+        }
+    }, [modalState.isOpen, deleteModal.isOpen, uploadModal.isOpen, 
+        annotationsModal.isOpen, controlMarksModal.isOpen]);
+
     const handleAddClient = () => {
         setModalState({ isOpen: true, mode: 'create', client: null });
     };

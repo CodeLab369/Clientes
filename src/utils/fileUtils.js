@@ -71,33 +71,49 @@ export const arrayBufferToBase64 = (buffer) => {
 };
 
 export const mergePDFs = async (pdfFiles) => {
-    const { PDFDocument } = await import('pdf-lib');
+    try {
+        const { PDFDocument } = await import('pdf-lib');
 
-    // Create a new PDF document
-    const mergedPdf = await PDFDocument.create();
+        // Create a new PDF document
+        const mergedPdf = await PDFDocument.create();
 
-    // Iterate through each PDF file
-    for (const file of pdfFiles) {
-        // Convert base64 to ArrayBuffer
-        const pdfBytes = base64ToArrayBuffer(file.contenido);
+        // Iterate through each PDF file
+        for (const file of pdfFiles) {
+            try {
+                // Validate file has content
+                if (!file.contenido) {
+                    console.error('File missing content:', file.nombre);
+                    throw new Error(`El archivo ${file.nombre} no tiene contenido`);
+                }
 
-        // Load the PDF
-        const pdf = await PDFDocument.load(pdfBytes);
+                // Convert base64 to ArrayBuffer
+                const pdfBytes = base64ToArrayBuffer(file.contenido);
 
-        // Copy all pages from the current PDF
-        const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                // Load the PDF
+                const pdf = await PDFDocument.load(pdfBytes);
 
-        // Add each page to the merged PDF
-        copiedPages.forEach((page) => {
-            mergedPdf.addPage(page);
-        });
+                // Copy all pages from the current PDF
+                const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+
+                // Add each page to the merged PDF
+                copiedPages.forEach((page) => {
+                    mergedPdf.addPage(page);
+                });
+            } catch (fileError) {
+                console.error(`Error processing file ${file.nombre}:`, fileError);
+                throw new Error(`Error al procesar ${file.nombre}: ${fileError.message}`);
+            }
+        }
+
+        // Serialize the merged PDF to bytes
+        const mergedPdfBytes = await mergedPdf.save();
+
+        // Convert to base64
+        return arrayBufferToBase64(mergedPdfBytes);
+    } catch (error) {
+        console.error('Error in mergePDFs:', error);
+        throw error;
     }
-
-    // Serialize the merged PDF to bytes
-    const mergedPdfBytes = await mergedPdf.save();
-
-    // Convert to base64
-    return arrayBufferToBase64(mergedPdfBytes);
 };
 
 export const generateMergedFileName = (clientNames) => {

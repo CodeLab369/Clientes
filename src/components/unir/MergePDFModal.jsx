@@ -119,8 +119,23 @@ const MergePDFModal = ({ isOpen, onClose, onMerge }) => {
             // Extract just the file objects
             const filesToMerge = selectedFiles.map(sf => sf.file);
 
-            // Merge PDFs
-            const mergedContent = await mergePDFs(filesToMerge);
+            // Validate files
+            if (!filesToMerge || filesToMerge.length === 0) {
+                throw new Error('No hay archivos válidos para fusionar');
+            }
+
+            // Merge PDFs with error handling
+            let mergedContent;
+            try {
+                mergedContent = await mergePDFs(filesToMerge);
+            } catch (mergeError) {
+                console.error('Error in mergePDFs:', mergeError);
+                throw new Error('Error al procesar los archivos PDF. Verifica que sean PDFs válidos.');
+            }
+
+            if (!mergedContent) {
+                throw new Error('El contenido fusionado está vacío');
+            }
 
             // Calculate total size (approximate)
             const totalSize = selectedFiles.reduce((sum, sf) => sum + (sf.file.tamaño || 0), 0);
@@ -137,13 +152,19 @@ const MergePDFModal = ({ isOpen, onClose, onMerge }) => {
                 cantidadArchivos: selectedFiles.length
             };
 
-            onMerge(mergedPDF);
-            showSuccess('PDFs fusionados exitosamente');
-            handleClose();
+            // Call onMerge and handle any errors from it
+            try {
+                await onMerge(mergedPDF);
+                showSuccess('PDFs fusionados exitosamente');
+                handleClose();
+            } catch (saveError) {
+                console.error('Error saving merged PDF:', saveError);
+                throw new Error('Error al guardar el PDF fusionado');
+            }
         } catch (error) {
             console.error('Error merging PDFs:', error);
-            showError('Error al fusionar los PDFs. Intenta de nuevo.');
-        } finally {
+            const errorMessage = error.message || 'Error al fusionar los PDFs. Intenta de nuevo.';
+            showError(errorMessage);
             setIsMerging(false);
         }
     };
